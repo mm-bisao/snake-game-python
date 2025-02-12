@@ -30,7 +30,7 @@ jobs:
           
           # Atualizar pip
           pip install --upgrade pip
-          pip install buildozer
+          pip install buildozer cython  # Instalar o Cython também
 
       - name: Install Android SDK
         run: |
@@ -74,7 +74,7 @@ jobs:
             echo "p4a.include_project = True" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "target = android" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "android.permissions = INTERNET" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.arch = armeabi-v7a" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "android.archs = armeabi-v7a" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "android.api = 29" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "android.ndk = 21b" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "android.sdk = 30" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
