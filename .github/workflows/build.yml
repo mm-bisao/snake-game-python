@@ -30,10 +30,10 @@ jobs:
 
       - name: Install Android SDK
         run: |
+          mkdir -p $HOME/Android/Sdk/cmdline-tools  # Criar o diretório correto
           curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $HOME/Android/Sdk
-          mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
-          mv $HOME/Android/Sdk/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest
+          unzip commandlinetools.zip -d $HOME/Android/Sdk/cmdline-tools  # Extrair o SDK para o diretório correto
+          rm commandlinetools.zip  # Remover o arquivo zip após a extração
           echo "export ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
@@ -41,4 +41,3 @@ jobs:
         run: |
           cd snake-game-python  # Navega para o diretório onde está o código, se necessário
           buildozer android debug  # Gera o APK de depuração (debug)
-
