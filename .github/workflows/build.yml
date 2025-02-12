@@ -87,21 +87,22 @@ jobs:
       run: |
         # Make sure we're in the correct directory if it exists
         if [ -d "src/android_project" ]; then
+          cd src/android_project
           buildozer -v android debug
         else
           echo "Skipping Buildozer step as directory src/android_project was not found."
         fi
 
     # Add this step to verify the APK generation location
-    - name: Check generated files after build
+    - name: Verify files in the android_project directory
       run: |
-        # List files in the bin directory where APK should be
-        echo "Checking files in bin directory..."
-        ls -R src/android_project/bin
+        echo "Verifying generated files..."
+        # List all files in the android_project directory to find where the APK is
+        ls -R src/android_project/
 
     # Upload the correct APK path after confirming location
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        path: src/android_project/bin/*.apk  # Ensure this path matches the actual location of the APK
+        path: src/android_project/bin/*.apk  # Adjust this path if needed
