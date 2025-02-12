@@ -30,11 +30,11 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          mkdir -p $HOME/Android/Sdk/cmdline-tools  # Criar o diretório correto
+          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Criar o diretório de extração no GITHUB_WORKSPACE
           curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $HOME/Android/Sdk/cmdline-tools  # Extrair o SDK para o diretório correto
+          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Extrair o SDK para o diretório correto
           rm commandlinetools.zip  # Remover o arquivo zip após a extração
-          echo "export ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+          echo "export ANDROID_HOME=$GITHUB_WORKSPACE/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
       - name: Build APK
