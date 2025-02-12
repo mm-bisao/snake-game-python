@@ -39,4 +39,4 @@ jobs:
 
       - name: Build APK
         run: |
-          buildozer android debug  # Gera o APK de depuração (debug), sem necessidade de cd
+          buildozer android debug  # Gera o APK de depuração (debug) diretamente na raiz do repositório
