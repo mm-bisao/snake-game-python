@@ -46,19 +46,21 @@ jobs:
           echo "export ANDROID_HOME=$GITHUB_WORKSPACE/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
-      - name: Build APK
+      - name: Ensure build layout
         run: |
           # Verificar se o diretório "snake-game-python" existe e navegar para ele
           if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
             echo "Diretório 'snake-game-python' não encontrado. Criando e movendo os arquivos necessários."
             mkdir $GITHUB_WORKSPACE/snake-game-python
-            # Aqui você pode fazer um comando para mover os arquivos para o novo diretório
-            # Exemplo: mv $GITHUB_WORKSPACE/* $GITHUB_WORKSPACE/snake-game-python/
+            mv $GITHUB_WORKSPACE/* $GITHUB_WORKSPACE/snake-game-python/
           fi
 
-          # Agora estamos no diretório correto (criado ou movido)
+          # Verificar se o arquivo buildozer.spec existe
+          if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
+            echo "Erro: O arquivo 'buildozer.spec' não foi encontrado. Abortando o processo."
+            exit 1
+          fi
+
+          # Navegar para o diretório correto e rodar o buildozer
           cd $GITHUB_WORKSPACE/snake-game-python
-
-          # Rodar o buildozer para criar o APK
           buildozer android debug  # Gera o APK de depuração
-
