@@ -74,9 +74,8 @@ jobs:
         export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
     # If buildozer.spec is in the root directory, no 'cd' is necessary
-    - name: Build the Android app with Buildozer
-      run: |
-        buildozer -v android debug
+    - name: Change directory to where buildozer.spec is located
+      run: cd src/android_project  # Replace with your actual path
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
