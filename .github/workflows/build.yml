@@ -65,7 +65,7 @@ jobs:
         buildozer -v android debug  # Adjust this to your specific buildozer command if needed
 
     - name: Upload APK artifact
-      uses: actions/upload-artifact@v3.2.0
+      uses: actions/upload-artifact@v4
       with:
         name: android-apk
         path: bin/*.apk  # Path where the APK is generated
