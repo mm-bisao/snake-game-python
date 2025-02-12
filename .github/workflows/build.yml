@@ -57,16 +57,4 @@ jobs:
           # Mover os arquivos, mas NÃO mover o próprio diretório snake-game-python
           for file in $(ls $GITHUB_WORKSPACE); do
             if [ "$file" != "snake-game-python" ]; then
-              mv $GITHUB_WORKSPACE/$file $GITHUB_WORKSPACE/snake-game-python/
-            fi
-          done
-
-          # Verificar se o arquivo buildozer.spec existe
-          if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
-            echo "Erro: O arquivo 'buildozer.spec' não foi encontrado. Abortando o processo."
-            exit 1
-          fi
-
-          # Navegar para o diretório correto e rodar o buildozer
-          cd $GITHUB_WORKSPACE/snake-game-python
-          buildozer android debug  # Gera o APK de depuração
+              mv $GITHUB_WORKSPACE/$file $GITHUB_WORKSPACE/snake-game-py
