@@ -39,5 +39,4 @@ jobs:
 
       - name: Build APK
         run: |
-          cd snake-game-python  # Navega para o diretório onde está o código, se necessário
-          buildozer android debug  # Gera o APK de depuração (debug)
+          buildozer android debug  # Gera o APK de depuração (debug), sem necessidade de cd
