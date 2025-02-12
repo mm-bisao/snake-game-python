@@ -48,13 +48,18 @@ jobs:
 
       - name: Ensure build layout
         run: |
-          # Verificar se o diretório "snake-game-python" existe e navegar para ele
+          # Verificar se o diretório "snake-game-python" existe, senão criar
           if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
-            echo "Diretório 'snake-game-python' não encontrado. Criando e movendo os arquivos necessários."
+            echo "Diretório 'snake-game-python' não encontrado. Criando."
             mkdir $GITHUB_WORKSPACE/snake-game-python
-            # Mover os arquivos para o diretório correto (evitar o erro de loop)
-            mv $GITHUB_WORKSPACE/* $GITHUB_WORKSPACE/snake-game-python/
           fi
+
+          # Mover os arquivos, mas NÃO mover o próprio diretório snake-game-python
+          for file in $(ls $GITHUB_WORKSPACE); do
+            if [ "$file" != "snake-game-python" ]; then
+              mv $GITHUB_WORKSPACE/$file $GITHUB_WORKSPACE/snake-game-python/
+            fi
+          done
 
           # Verificar se o arquivo buildozer.spec existe
           if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
