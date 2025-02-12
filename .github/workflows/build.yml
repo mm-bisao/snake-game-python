@@ -25,8 +25,8 @@ jobs:
           sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
           sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
           
-          # Instalar o setuptools corretamente (que inclui distutils)
-          sudo apt-get install -y python3-setuptools
+          # Instalar setuptools e outros pacotes essenciais
+          sudo apt-get install -y python3-setuptools python3-distutils
           
           # Atualizar o pip para garantir que está na versão mais recente
           pip install --upgrade pip
