@@ -73,9 +73,10 @@ jobs:
         export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529
         export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
+    # Remove or modify the following line if buildozer.spec is in the root directory
     - name: Change directory to where buildozer.spec is located
-      run: cd path/to/your/project  # Adjust this path if needed
-
+      run: cd android_project  # If buildozer.spec is in a subdirectory like 'android_project'
+      
     - name: Build the Android app with Buildozer
       run: |
         buildozer -v android debug
