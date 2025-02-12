@@ -1,99 +1,71 @@
-name: Build APK
+name: Build Android App
 
 on:
   push:
     branches:
-      - main  # Ou a branch que você estiver usando para o código
+      - main  # You can specify the branch you want to trigger the build on
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # A plataforma de compilação que será usada
+    runs-on: ubuntu-latest  # or use a specific runner depending on your setup
 
     steps:
-      # 1. Baixar o código do repositório
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # 2. Configuração do Python
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'  # Usando Python 3.8
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adoptopenjdk'
 
-      # 3. Instalar as dependências necessárias para o Buildozer
-      - name: Install Buildozer dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev libsqlite3-dev
-          sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
-          sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
-          sudo apt-get install -y python3-setuptools
-          
-          # Atualizar pip e instalar Buildozer, Cython e dependências do Android SDK
-          pip install --upgrade pip
-          pip install buildozer cython
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y wget curl unzip python3-pip openjdk-11-jdk
+        pip install cython
 
-      # 4. Instalar Android SDK e ferramentas necessárias
-      - name: Install Android SDK and tools
-        run: |
-          # Criar diretório para o SDK Android
-          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools
+    - name: Install Android SDK
+      run: |
+        # Download and unzip Android SDK command-line tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+        unzip commandlinetools-linux-7583922_latest.zip -d $HOME/android-sdk
+        # Set environment variables
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$HOME/android-sdk/ndk/21.4.7075529" >> $GITHUB_ENV
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
-          # Baixar e extrair o SDK
-          curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools
-          rm commandlinetools.zip
+    - name: Accept SDK licenses
+      run: |
+        yes | sdkmanager --licenses
 
-          # Configurar variáveis de ambiente para o Android SDK
-          echo "ANDROID_HOME=$GITHUB_WORKSPACE/Android/Sdk" >> $GITHUB_ENV
-          echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
-          
-          # Instalar as ferramentas do SDK, incluindo o sdkmanager
-          echo "export PATH=\$PATH:\$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
-          echo "export PATH=\$PATH:\$ANDROID_HOME/platform-tools" >> $GITHUB_ENV
-          echo "export PATH=\$PATH:\$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-          source $GITHUB_ENV
+    - name: Install SDK packages
+      run: |
+        sdkmanager "platform-tools"
+        sdkmanager "build-tools;30.0.3"  # Ensure that the build tools version matches your project
+        sdkmanager "tools"
+        sdkmanager "platforms;android-30"  # You can change this to match your target API
 
-          # Aceitar as licenças e instalar pacotes do SDK
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "ndk;21.3.6528147" "cmdline-tools;latest"
+    - name: Install dependencies for Buildozer
+      run: |
+        pip install buildozer
 
-      # 5. Garantir que o diretório do projeto esteja correto
-      - name: Ensure correct project directory
-        run: |
-          if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
-            echo "Diretório 'snake-game-python' não encontrado. Criando."
-            mkdir $GITHUB_WORKSPACE/snake-game-python
-          fi
+    - name: Set up Android SDK and NDK paths
+      run: |
+        export ANDROID_HOME=$HOME/android-sdk
+        export ANDROID_SDK_ROOT=$ANDROID_HOME
+        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529
+        export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
-          # Mover os arquivos necessários para o diretório correto
-          for file in $(ls $GITHUB_WORKSPACE); do
-            if [ "$file" != "snake-game-python" ]; then
-              mv $GITHUB_WORKSPACE/$file $GITHUB_WORKSPACE/snake-game-python/
-            fi
-          done
+    - name: Build the Android app with Buildozer
+      run: |
+        buildozer -v android debug  # Adjust this to your specific buildozer command if needed
 
-          # Verificar e criar o arquivo buildozer.spec, se não existir
-          if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
-            echo "O arquivo 'buildozer.spec' não foi encontrado. Criando um arquivo básico."
-            echo "[app]" > $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "title = Snake Game" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "package.name = snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "package.domain = org.snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "source.dir = ." >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "version = 1.0.0" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "source.include_exts = py,png,jpg,kv,atlas" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "p4a.include_project = True" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "target = android" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.permissions = INTERNET" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.archs = armeabi-v7a" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.api = 29" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.ndk = 21b" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-            echo "android.sdk = 30" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
-          fi
-
-      # 6. Construir o APK
-      - name: Build APK
-        run: |
-          cd $GITHUB_WORKSPACE/snake-game-python
-          buildozer android debug  # Gera o APK de depuração
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: android-apk
+        path: bin/*.apk  # Path where the APK is generated
