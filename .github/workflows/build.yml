@@ -65,6 +65,11 @@ jobs:
           if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
             echo "O arquivo 'buildozer.spec' não foi encontrado. Criando um arquivo básico."
             echo "[buildozer]" > $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "title = Snake Game" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "package.name = snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "package.domain = org.snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "source.dir = ." >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "version = 1.0.0" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "source.include_exts = py,png,jpg,kv,atlas" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "p4a.include_project = True" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "target = android" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
