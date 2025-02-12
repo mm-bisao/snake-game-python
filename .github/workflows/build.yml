@@ -1,68 +1,64 @@
-name: Build Android App
+name: Build Android APK
 
 on:
   push:
     branches:
-      - main  # Specify the branch to trigger the build
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
+    # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        java-version: '11'
-        distribution: 'temurin'  # Corrected to use Adoptium
+        python-version: '3.x'
 
+    # Step 3: Install necessary dependencies
     - name: Install dependencies
       run: |
-        sudo apt-get update -y
-        sudo apt-get install -y wget curl unzip python3-pip openjdk-11-jdk
-        pip install cython
+        sudo apt-get update
+        sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev libsqlite3-dev libncurses5 libgdbm-dev libbz2-dev
+        sudo apt-get install -y openjdk-11-jdk
+        sudo apt-get install -y libncurses5 libncurses5-dev libreadline-dev libssl-dev
+        sudo apt-get install -y zip unzip
 
-    - name: Install Android SDK Command Line Tools
+    # Step 4: Install Buildozer
+    - name: Install Buildozer
       run: |
-        # Ensure the Android SDK directory exists
+        pip install --upgrade pip
+        pip install buildozer
+
+    # Step 5: Install Android SDK (needed for Buildozer to generate APK)
+    - name: Install Android SDK
+      run: |
+        # Setup Android SDK
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
+        unzip commandlinetools-linux-8092744_latest.zip -d android-sdk
         mkdir -p $HOME/android-sdk/cmdline-tools
-
-        # Download the latest SDK command line tools zip
-        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
-
-        # Unzip the downloaded SDK tools to the correct location
-        unzip commandlinetools-linux-7583922_latest.zip -d $HOME/android-sdk/cmdline-tools/
-
-        # Ensure the 'latest' directory exists and contains the tools
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-        # Set up the environment variables
+        mv android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools
+        rm -rf commandlinetools-linux-8092744_latest.zip
+        
+        # Set environment variables
         echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
         echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
-    - name: Confirm sdkmanager location
+    # Step 6: Accept licenses (important for Buildozer to work)
+    - name: Accept Android SDK Licenses
       run: |
-        echo "Verifying sdkmanager path"
-        ls $HOME/android-sdk/cmdline-tools/latest/bin
-
-    - name: Accept SDK licenses
-      run: |
-        export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
         yes | sdkmanager --licenses
 
-    - name: Install SDK packages
-      run: |
-        export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
-        sdkmanager "platform-tools"
-        sdkmanager "build-tools;30.0.3"
-        sdkmanager "platforms;android-30"
-        sdkmanager "ndk;21.4.7075529"
-
-    - name: Check for buildozer.spec
+    # Step 7: Verify the buildozer.spec path (adjust it accordingly)
+    - name: Verify buildozer.spec path
       run: |
         if [ -f "src/android_project/buildozer.spec" ]; then
           echo "Found buildozer.spec, proceeding with build"
@@ -71,30 +67,15 @@ jobs:
           exit 1
         fi
 
-    - name: Install dependencies for Buildozer
+    # Step 8: Run Buildozer to build APK
+    - name: Build APK with Buildozer
       run: |
-        pip install buildozer
-
-    - name: Set up Android SDK and NDK paths
-      run: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export ANDROID_SDK_ROOT=$ANDROID_HOME
-        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529
-        export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-
-    - name: Check directory and build
-      run: |
-        cd src/android_project
+        cd src/android_project  # Adjust if your project directory differs
         buildozer -v android debug
 
-    - name: Check generated files after build
-      run: |
-        # List files in the current directory to verify where the APK is
-        ls -R
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
+    # Step 9: Upload APK (if found)
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v2
       with:
-        name: android-apk
-        path: |
-          **/bin/*.apk  # This searches in all directories and subdirectories for APKs
+        name: apk
+        path: src/android_project/bin/*.apk  # This should match the APK path generated by Buildozer
