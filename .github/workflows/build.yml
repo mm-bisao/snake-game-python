@@ -52,6 +52,7 @@ jobs:
           if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
             echo "Diretório 'snake-game-python' não encontrado. Criando e movendo os arquivos necessários."
             mkdir $GITHUB_WORKSPACE/snake-game-python
+            # Mover os arquivos para o diretório correto (evitar o erro de loop)
             mv $GITHUB_WORKSPACE/* $GITHUB_WORKSPACE/snake-game-python/
           fi
 
