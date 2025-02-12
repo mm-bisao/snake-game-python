@@ -59,8 +59,17 @@ jobs:
         export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
         sdkmanager "platform-tools"
         sdkmanager "build-tools;30.0.3"
-        sdkmanager "tools"
         sdkmanager "platforms;android-30"
+        sdkmanager "ndk;21.4.7075529"
+
+    - name: Check for buildozer.spec
+      run: |
+        if [ -f "src/android_project/buildozer.spec" ]; then
+          echo "Found buildozer.spec, proceeding with build"
+        else
+          echo "buildozer.spec not found, aborting build"
+          exit 1
+        fi
 
     - name: Install dependencies for Buildozer
       run: |
@@ -73,32 +82,16 @@ jobs:
         export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529
         export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
-    # Check if the android_project directory exists before attempting to cd into it
-    - name: Check if android_project directory exists
+    - name: Check directory and build
       run: |
-        if [ -d "src/android_project" ]; then
-          echo "Directory exists, changing into src/android_project"
-          cd src/android_project
-        else
-          echo "Directory src/android_project not found. Skipping this step."
-        fi
+        cd src/android_project
+        buildozer -v android debug
 
-    - name: Build the Android app with Buildozer
-      run: |
-        # Make sure we're in the correct directory if it exists
-        if [ -d "src/android_project" ]; then
-          buildozer -v android debug
-        else
-          echo "Skipping Buildozer step as directory src/android_project was not found."
-        fi
-
-    # Add this step to verify the APK generation location
     - name: Check generated files after build
       run: |
         # List files in the current directory to verify where the APK is
         ls -R
 
-    # Upload the correct APK path after confirming location
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
