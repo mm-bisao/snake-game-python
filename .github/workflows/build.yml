@@ -30,13 +30,30 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Criar o diretório de extração no GITHUB_WORKSPACE
+          # Criar o diretório Android SDK, se necessário
+          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Criar diretório para o SDK Android
+          
+          # Baixar o SDK do Android
           curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Extrair o SDK para o diretório correto
-          rm commandlinetools.zip  # Remover o arquivo zip após a extração
+          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Extrair SDK
+          rm commandlinetools.zip  # Remover arquivo zip após extração
+          
+          # Configurar o Android SDK no ambiente
           echo "export ANDROID_HOME=$GITHUB_WORKSPACE/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
       - name: Build APK
         run: |
-          buildozer android debug  # Gera o APK de depuração (debug) diretamente na raiz do repositório
+          # Verificar se o diretório "snake-game-python" existe e navegar para ele
+          if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
+            echo "Diretório 'snake-game-python' não encontrado. Criando e movendo os arquivos necessários."
+            mkdir $GITHUB_WORKSPACE/snake-game-python
+            # Aqui você pode fazer um comando para mover os arquivos para o novo diretório
+            # Exemplo: mv $GITHUB_WORKSPACE/* $GITHUB_WORKSPACE/snake-game-python/
+          fi
+
+          # Agora estamos no diretório correto (criado ou movido)
+          cd $GITHUB_WORKSPACE/snake-game-python
+
+          # Rodar o buildozer para criar o APK
+          buildozer android debug  # Gera o APK de depuração
