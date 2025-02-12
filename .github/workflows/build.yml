@@ -10,58 +10,64 @@ jobs:
     runs-on: ubuntu-latest  # A plataforma de compilação que será usada
 
     steps:
+      # 1. Baixar o código do repositório
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # 2. Configuração do Python
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'  # Usando Python 3.8
 
+      # 3. Instalar as dependências necessárias para o Buildozer
       - name: Install Buildozer dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev libsqlite3-dev
           sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
           sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
-          
-          # Instalar setuptools corretamente
           sudo apt-get install -y python3-setuptools
           
-          # Atualizar pip
+          # Atualizar pip e instalar Buildozer, Cython e dependências do Android SDK
           pip install --upgrade pip
-          pip install buildozer cython  # Instalar o Cython também
+          pip install buildozer cython
 
-      - name: Install Android SDK
+      # 4. Instalar Android SDK, ferramentas necessárias e AIDL
+      - name: Install Android SDK and AIDL
         run: |
-          # Criar o diretório Android SDK, se necessário
-          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Criar diretório para o SDK Android
+          # Criar diretório para o SDK Android
+          mkdir -p $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools
           
-          # Baixar o SDK do Android
+          # Baixar e extrair o SDK
           curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools  # Extrair SDK
-          rm commandlinetools.zip  # Remover arquivo zip após extração
+          unzip commandlinetools.zip -d $GITHUB_WORKSPACE/Android/Sdk/cmdline-tools
+          rm commandlinetools.zip
           
-          # Configurar o Android SDK no ambiente
+          # Configurar variáveis de ambiente para o Android SDK
           echo "export ANDROID_HOME=$GITHUB_WORKSPACE/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
-      - name: Ensure build layout
+          # Aceitar as licenças e instalar pacotes do SDK, incluindo AIDL
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" "ndk;21.3.6528147" "cmdline-tools;latest"
+
+      # 5. Garantir que o diretório do projeto esteja correto
+      - name: Ensure correct project directory
         run: |
-          # Verificar se o diretório "snake-game-python" existe, senão criar
           if [ ! -d "$GITHUB_WORKSPACE/snake-game-python" ]; then
             echo "Diretório 'snake-game-python' não encontrado. Criando."
             mkdir $GITHUB_WORKSPACE/snake-game-python
           fi
 
-          # Mover os arquivos, mas NÃO mover o próprio diretório snake-game-python
+          # Mover os arquivos necessários para o diretório correto
           for file in $(ls $GITHUB_WORKSPACE); do
             if [ "$file" != "snake-game-python" ]; then
               mv $GITHUB_WORKSPACE/$file $GITHUB_WORKSPACE/snake-game-python/
             fi
           done
 
-          # Verificar se o arquivo buildozer.spec existe
+          # Verificar e criar o arquivo buildozer.spec, se não existir
           if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
             echo "O arquivo 'buildozer.spec' não foi encontrado. Criando um arquivo básico."
             echo "[app]" > $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
@@ -80,6 +86,9 @@ jobs:
             echo "android.sdk = 30" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
           fi
 
-          # Navegar para o diretório correto e rodar o buildozer
+      # 6. Construir o APK
+      - name: Build APK
+        run: |
           cd $GITHUB_WORKSPACE/snake-game-python
           buildozer android debug  # Gera o APK de depuração
+
