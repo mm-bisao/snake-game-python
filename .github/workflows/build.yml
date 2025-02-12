@@ -95,13 +95,13 @@ jobs:
     # Add this step to verify the APK generation location
     - name: Check generated files after build
       run: |
-        # List files in the current directory to verify where the APK is
-        ls -R
+        # List files in the bin directory where APK should be
+        echo "Checking files in bin directory..."
+        ls -R src/android_project/bin
 
     # Upload the correct APK path after confirming location
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        path: |
-          **/bin/*.apk  # This searches in all directories and subdirectories for APKs
+        path: src/android_project/bin/*.apk  # Ensure this path matches the actual location of the APK
