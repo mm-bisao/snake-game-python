@@ -13,10 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
+      - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'  # Versão do Python a ser usada
+          python-version: '3.8'  # Usando Python 3.8
 
       - name: Install Buildozer dependencies
         run: |
@@ -25,10 +25,10 @@ jobs:
           sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
           sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
           
-          # Instalar setuptools e outros pacotes essenciais
-          sudo apt-get install -y python3-setuptools python3-distutils
+          # Instalar setuptools corretamente
+          sudo apt-get install -y python3-setuptools
           
-          # Atualizar o pip para garantir que está na versão mais recente
+          # Atualizar pip
           pip install --upgrade pip
           pip install buildozer
 
@@ -61,3 +61,4 @@ jobs:
 
           # Rodar o buildozer para criar o APK
           buildozer android debug  # Gera o APK de depuração
+
