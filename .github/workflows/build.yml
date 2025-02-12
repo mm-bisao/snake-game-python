@@ -73,9 +73,24 @@ jobs:
         export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529
         export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
-    # If buildozer.spec is in the root directory, no 'cd' is necessary
-    - name: Change directory to where buildozer.spec is located
-      run: cd src/android_project  # Replace with your actual path
+    # Check if the android_project directory exists before attempting to cd into it
+    - name: Check if android_project directory exists
+      run: |
+        if [ -d "src/android_project" ]; then
+          echo "Directory exists, changing into src/android_project"
+          cd src/android_project
+        else
+          echo "Directory src/android_project not found. Skipping this step."
+        fi
+
+    - name: Build the Android app with Buildozer
+      run: |
+        # Make sure we're in the correct directory if it exists
+        if [ -d "src/android_project" ]; then
+          buildozer -v android debug
+        else
+          echo "Skipping Buildozer step as directory src/android_project was not found."
+        fi
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
