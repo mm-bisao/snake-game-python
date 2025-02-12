@@ -64,7 +64,7 @@ jobs:
           # Verificar se o arquivo buildozer.spec existe
           if [ ! -f "$GITHUB_WORKSPACE/snake-game-python/buildozer.spec" ]; then
             echo "O arquivo 'buildozer.spec' não foi encontrado. Criando um arquivo básico."
-            echo "[buildozer]" > $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
+            echo "[app]" > $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "title = Snake Game" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "package.name = snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
             echo "package.domain = org.snakegame" >> $GITHUB_WORKSPACE/snake-game-python/buildozer.spec
