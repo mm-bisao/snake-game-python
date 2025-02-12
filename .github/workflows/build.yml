@@ -27,15 +27,15 @@ jobs:
 
     - name: Install Android SDK Command Line Tools
       run: |
-        # Create the directory if it doesn't exist
-        mkdir -p $HOME/android-sdk/cmdline-tools
+        # Ensure directory exists before extraction
+        mkdir -p $HOME/android-sdk/cmdline-tools/latest
 
         # Download and unzip SDK command line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
         unzip commandlinetools-linux-7583922_latest.zip -d $HOME/android-sdk/cmdline-tools
 
-        # Check if the tools were extracted correctly
-        ls -l $HOME/android-sdk/cmdline-tools
+        # Ensure sdkmanager is correctly located
+        ls -l $HOME/android-sdk/cmdline-tools/latest/bin
 
         # Set up the environment variables for SDK location
         echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
