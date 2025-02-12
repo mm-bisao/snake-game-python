@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev libsqlite3-dev
           sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
           sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
-          sudo apt-get install -y python3-distutils  # Instalar distutils
+          sudo apt-get install -y python3-setuptools  # Instalar setuptools (inclui distutils)
           pip install --upgrade pip
           pip install buildozer
 
@@ -41,3 +41,4 @@ jobs:
         run: |
           cd snake-game-python  # Navega para o diretório onde está o código, se necessário
           buildozer android debug  # Gera o APK de depuração (debug)
+
