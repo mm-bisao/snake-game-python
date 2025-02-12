@@ -24,17 +24,20 @@ jobs:
           sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev libsqlite3-dev
           sudo apt-get install -y libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
           sudo apt-get install -y libbz2-dev zlib1g-dev liblzma-dev
+          sudo apt-get install -y python3-distutils  # Instalar distutils
+          pip install --upgrade pip
           pip install buildozer
 
       - name: Install Android SDK
         run: |
-          curl https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o android-sdk.zip
-          unzip android-sdk.zip
-          mkdir -p $HOME/Android/Sdk/cmdline-tools
-          mv cmdline-tools $HOME/Android/Sdk/cmdline-tools/latest
+          curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
+          unzip commandlinetools.zip -d $HOME/Android/Sdk
+          mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
+          mv $HOME/Android/Sdk/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest
           echo "export ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
           echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
       - name: Build APK
         run: |
+          cd snake-game-python  # Navega para o diretório onde está o código, se necessário
           buildozer android debug  # Gera o APK de depuração (debug)
